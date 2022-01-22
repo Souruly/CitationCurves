@@ -2,6 +2,7 @@ import numpy
 from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 import csv
+import random
 
 from tslearn import metrics
 from tslearn.clustering import TimeSeriesKMeans
@@ -57,11 +58,40 @@ sdtw_km = TimeSeriesKMeans(n_clusters=numberOfClusters,
                            random_state=seed)
 y_pred = sdtw_km.fit_predict(X_train)
 
+print("Done clustering")
+
+
+# Save Cluster Centres to file : 
+clusterCenters = []
+for i in range(0, numberOfClusters):
+    clusterCenters.append(sdtw_km.cluster_centers_[i].ravel())
+
+with open('clusterCenters.csv', 'w', newline='') as f: 
+        write = csv.writer(f) 
+        write.writerows(clusterCenters) 
+
+print("Cluster centres saved to file")
+
+# Save Output to file : 
+for i in range(0, len(papers)):
+    papers[i].insert(0, y_pred[i])
+
+with open('output.csv', 'w', newline='') as f: 
+        write = csv.writer(f) 
+        write.writerows(papers) 
+
+print("Output saved to file")
+
+
+# Plotting curves
+curveDisplayRate = 1
+print("Displaying clusters")
 for yi in range(numberOfClusters):
     if (round(yi/3) <1): 
         plt.subplot(2, 3, 1 + yi)
         for xx in X_train[y_pred == yi]:
-            plt.plot(xx.ravel(), "k-", alpha=.2)
+            if(random.random()<curveDisplayRate):
+                plt.plot(xx.ravel(), "k-", alpha=.2)
         plt.plot(sdtw_km.cluster_centers_[yi].ravel(), "r-")
         plt.xlim(0, sz)
         plt.ylim(0, 1)
@@ -72,7 +102,8 @@ for yi in range(numberOfClusters):
     else:
         plt.subplot(2, 3, 1 + yi)
         for xx in X_train[y_pred == yi]:
-            plt.plot(xx.ravel(), "k-", alpha=.2)
+            if(random.random()<curveDisplayRate):
+                plt.plot(xx.ravel(), "k-", alpha=.2)
         plt.plot(sdtw_km.cluster_centers_[yi].ravel(), "r-")
         plt.xlim(0, sz)
         plt.ylim(0, 1)
@@ -83,3 +114,4 @@ for yi in range(numberOfClusters):
 
 plt.tight_layout()
 plt.show()
+
