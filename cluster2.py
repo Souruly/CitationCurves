@@ -11,9 +11,9 @@ from tslearn.preprocessing import TimeSeriesScalerMeanVariance, TimeSeriesResamp
 
 papers = []
 timeSeriesDataset = []
-maxSelect = 1000
+maxSelect = 10000
 
-with open('dataset.csv', mode='r') as dataFile:
+with open('resampledNormData.csv', mode='r') as dataFile:
     index = 0
     csvFile = csv.reader(dataFile)
     count = 0
@@ -38,8 +38,6 @@ numpy.random.seed(seed)
 
 X_train = to_time_series_dataset(timeSeriesDataset)
 
-# Resample Series
-X_train = TimeSeriesResampler(sz=40).fit_transform(X_train)
 sz = X_train.shape[1]
 
 
@@ -55,7 +53,8 @@ sdtw_km = TimeSeriesKMeans(n_clusters=numberOfClusters,
                            metric="softdtw",
                            metric_params={"gamma": .01},
                            verbose=True,
-                           random_state=seed)
+                           random_state=seed,
+                           n_jobs=3)
 y_pred = sdtw_km.fit_predict(X_train)
 
 print("Done clustering")
@@ -84,7 +83,7 @@ print("Output saved to file")
 
 
 # Plotting curves
-curveDisplayRate = 1
+curveDisplayRate = 0.2
 print("Displaying clusters")
 for yi in range(numberOfClusters):
     if (round(yi/3) <1): 
